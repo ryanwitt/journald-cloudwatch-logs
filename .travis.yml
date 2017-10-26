@@ -1,0 +1,19 @@
+sudo: required
+language: go
+services: docker
+before_install:
+- docker build -f ubuntu-xenial.dockerfile -t $TRAVIS_COMMIT .
+install: /bin/true
+script:
+- mkdir -p bin
+- docker run -it $TRAVIS_COMMIT sh -c 'cat ./journald-cloudwatch-logs | base64 -w0' | base64 --decode > ./bin/journald-cloudwatch-logs-xenial
+- gzip -k9 ./bin/journald-cloudwatch-logs-xenial
+deploy:
+  provider: releases
+  api_key:
+    secure: cTnslYWQsaTKJXAy6cl3By6XUgGZsI4MSf9B03518KCDHfrUmjCbyliiiDqmPqc8flWgd8T9/OtWeIu+V/4uVmftgAfVQFQuB0t2wcXJvL3FMNPC2Xr5tW4UUVhdgjPbBD0WpnjDaJCLoZe1xkbENPQX0Hsk7dpz1kDu9ly06rpC+5MdVig8MSf+xMvoCLdFVJUxqm8HF+SKoJYY3CxPebzx0ja/K8VAxKAwKy7zHrOlAaRK//VoTGGj1wkEO8Qrgq4Xqjn1iCgwSWfNauXdp/MgqdXw7XHQQM9/9qyCSsqKi1HgTRI8QfEdqIylLBUl4yNJ4zabmHgK43bF58sFM5VwNrMxkfunQVk1heiVBdLEi9udjwmlB0945JI/Ts16Xn/i3VolRgRPkRouRdEmh1CZ+n1To2flygPn7Vy+ifnlUmqOreglbeJx17apxiBTeftykFzPTzF88jtiZs4R0B79HP7sogh0yrJftFkYenI33sYv6j8VgPI2kwyOIuMbTxSwx18CDEMATD5onopeavX2mfZHweS2Hb4l6pd4TjqB3cLyfp+k0lUlNZYVeWL73Q19zR7UzuNVnlOlmNs/WLe1Rq88vGSGXNtZdXEuL49MN3XyBliZvpCccGSw1v+df6ZqvsKif9Djd73Gy+3tHFDvlae+j5SxYiSENRvkRmo=
+  file: ./bin/journald-cloudwatch-logs-xenial.gz
+  skip_cleanup: true
+  on:
+    repo: ryanwitt/journald-cloudwatch-logs
+    tags: true
